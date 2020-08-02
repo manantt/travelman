@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Travel man</title>
+	<meta name="description" content="Travel man">
+	<meta name="author" content="Manuel Antón">
+	<link rel="stylesheet" href="css/styles.css?v=1.0">
+	<style>
+		body {
+			font-family: 'lato', sans-serif;
+		}
+		.container {
+			max-width: 1000px;
+			margin-left: auto;
+			margin-right: auto;
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+		h2 {
+			font-size: 26px;
+			margin: 20px 0;
+			text-align: center;
+		}
+		h2 small {
+			font-size: 0.5em;
+		}
+		h3 {
+			font-size: 20px;
+			margin: 10px 0;
+			text-align: center;
+		}
+		h3 small {
+			font-size: 0.5em;
+		}
+		.raw {
+			border-radius: 3px;
+    		padding: 15px 20px;
+			font-family: monospace;
+			background-color: #ffffff;
+    		box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.15);
+    		margin-bottom: 15px;
+		}
+		#mapa {
+	        width:  100%px;
+	        height: 500px;
+        }
+	</style>
+</head>
+
+<body>
+	<h2>TravelMan <small>Manuel Antón Vicente</small></h2>
+	<div class="container">
+		<h3>Total travel distance: {{ distance }} <small>Km</small></h3>
+		<p class="raw">
+			<span>{% for city in route.cities %}{{city.name~"\\n"}}{% endfor %}</span>
+		</p>
+		<div id="mapa"></div>
+	</div>
+	<script>
+		function init() {
+		    var mapOptions = {
+		        center: new google.maps.LatLng({{route.cities.0.latitude}}, {{route.cities.0.longitude}}),
+		        mapTypeId: google.maps.MapTypeId.SATELLITE, //ROADMAP  SATELLITE HYBRID TERRAIN
+		        zoom: 2
+		    };
+		 
+		    var map;
+		    map = new google.maps.Map(document.getElementById('mapa'), mapOptions);
+
+		    flightPlanCoordinates = [];
+		    {% for city in route.cities %}
+		    	flightPlanCoordinates.push({lat: {{city.latitude}}, lng: {{ city.longitude }}});
+			    var marker{{loop.index}} = new google.maps.Marker({
+			        position: new google.maps.LatLng({{city.latitude}}, {{ city.longitude }}),
+			        map: map,
+			        title: "{{ city.name }}",
+			        label: {text: "{{ loop.index }}", color: "#ffffff" }
+			    });
+		    {% endfor %}
+		    var flightPath = new google.maps.Polyline({
+			    path: flightPlanCoordinates,
+			    geodesic: true,
+			    strokeColor: '#FF0000',
+			    strokeOpacity: 1.0,
+			    strokeWeight: 2
+		    });
+
+			flightPath.setMap(map);
+		}
+		 
+		function loadScript() {
+		    var script = document.createElement('script');
+		    script.src = 'http://maps.googleapis.com/maps/api/js?callback=init&key=AIzaSyAa47-eakaKW_ELBkAvWi8bpzOjj6kcVH0';
+		    document.body.appendChild(script);                 
+		}
+		 
+		window.onload = loadScript;
+	</script>
+</body>
+</html>
